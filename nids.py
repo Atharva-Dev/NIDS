@@ -21,6 +21,21 @@ def check_syn_flood(packet) :
     if tcp_open_ports > tcp_open_port_threshold :
         #todo alert !!
     
+def varify_mac(target_ip):
+    request_arp = scapy.ARP(pdst = target_ip)
+    br = scapy.Ether(dst="ff:ff:ff:ff:ff:ff")
+    arp_req_br = br / arp_request
+    list_1 = scapy.srp(arp_req_br, timeout=5,verbose=False)[0]
+    return list_1[0][1].hwsrc
+
+def check_arp_spoofing(packet):
+    who_has = 1;
+    is_at = 2;
+    if packet['ARP'].op == is_at :
+        received_mac = packet['ARP'].hwsrc
+        checked_mac = varify_mac(packet['ARP'].psrc)
+        if received_mac != checked_mac :
+            #todo alert !!
 
     
 def examine(packet):
