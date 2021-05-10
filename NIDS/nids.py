@@ -19,8 +19,12 @@ class nids:
         sniff(filter='tcp or arp', prn=self.examine, store = False, stop_filter=lambda x: self.stop(x))
 
     def stop(self, x):
-        print(self.done)
+        # print(self.done)
         return self.done
+
+    def finish(self):
+        self.done = True
+    
     def set_tcp_open_port_threshold(self, threshold):
         self.tcp_open_port_threshold = threshold
 
