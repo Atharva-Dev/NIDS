@@ -12,22 +12,62 @@
         function start() {
             arp_spoof_checked = document.getElementById('arp_spoof').checked
             syn_flood_checked = document.getElementById('syn_flood').checked
+            max_open_connections = document.getElementById('threshold').value
 
             if (arp_spoof_checked | syn_flood_checked) {
-                eel.get_vals(arp_spoof_checked, syn_flood_checked)
-                document.getElementById('first').style.display = "None"
-                document.getElementById('second').style.display = "initial"
-            }
-            else {
-                document.getElementById('button').innerHTML = 'none is checked'
+                if (syn_flood_checked & (max_open_connections < 0 | max_open_connections == '')) {
+                    if (max_open_connections == '')
+                        document.getElementById('error_msg').innerHTML = 'Enter maximum open connections'
+                    if (max_open_connections < 0)
+                        document.getElementById('error_msg').innerHTML = 'Maximum open connections cannot be negative!!'
+
+                    document.getElementById('error_msg').style.visibility = "visible"
+
+                } else {
+
+                    eel.get_vals(arp_spoof_checked, syn_flood_checked, max_open_connections)
+                    document.getElementById('first').style.display = "None"
+                    document.getElementById('second').style.display = "initial"
+                }
+            } else {
+                document.getElementById('error_msg').innerHTML = 'none of the options are checked'
+                document.getElementById('error_msg').style.visibility = "visible"
             }
 
 
         }
+
         function Stop() {
+            eel.stop_sniff()
+
             document.getElementById('first').style.display = "initial"
             document.getElementById('second').style.display = "none"
-            eel.stop_sniff()
+
+        }
+
+        function warning() {
+            document.getElementById('error_msg').style.visibility = "hidden"
+        }
+
+        function setThreshold() {
+            warning()
+            isChecked = document.getElementById('syn_flood').checked
+            input_field = document.getElementsByClassName('threshold')[0];
+            if (isChecked) {
+                input_field.style.maxHeight = input_field.scrollHeight + "px";
+            } else {
+                input_field.style.maxHeight = "0";
+            }
+        }
+        eel.expose('action_upon_detecting_arp_spoof');
+
+        function action_upon_detecting_arp_spoof() {
+            document.getElementById('message').innerHTML = "Arp Spoofing Attack Detected !!!"
+        }
+        eel.expose('action_upon_detecting_syn_flood');
+
+        function action_upon_detecting_syn_flood() {
+            document.getElementById('message').innerHTML = "Syn Flood Attack Detected !!!"
         }
     </script>
     <title>NIDS</title>
@@ -39,28 +79,39 @@
             <h1>NIDS </h1>
 
             <div class="group">
-                <input type="checkbox" id="arp_spoof" name="arp_spoof" value="arp_spoof">
+                <input type="checkbox" id="arp_spoof" name="arp_spoof" value="arp_spoof" onclick="warning()">
                 <label for="arp_spoof"> Detect ARP Spoofing</label><br>
+
             </div>
 
             <div class="group">
-                <input type="checkbox" id="syn_flood" name="syn_flood" value="syn_flood">
+                <input type="checkbox" id="syn_flood" name="syn_flood" value="syn_flood" onclick="setThreshold()">
                 <label for="syn_flood"> Detect Syn Flood</label><br>
+                <div class="threshold">
+                    <!-- <label for="threshold">Maximum half-open <br> connections</label> -->
+                    <input type="number" name="threshold" id="threshold" placeholder="Max half-open connections">
+
+                </div>
 
             </div>
             <div class="group">
                 <button class="button" id="button" onclick="start()">Start</button>
             </div>
-
+            <div class="group">
+                <div class="error">
+                    <p id="error_msg">no error</p>
+                </div>
+            </div>
         </div>
+
     </div>
     <div id="second" style="display: none;">
         <div class="container">
             <div class="group">
-                <h2>Detecting . . . </h2>
+                <h2 id="message">Detecting . . . </h2>
             </div>
             <div class="group">
-                <button class="button" id="button" onclick="Stop()">Stop</button>
+                <button class="button" id="stop_button" onclick="Stop()">Stop</button>
             </div>
         </div>
     </div>
