@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="style.css">
+    <script type="text/javascript" src="eel.js"></script>
+
+    <script>
+        function start() {
+            arp_spoof_checked = document.getElementById('arp_spoof').checked
+            syn_flood_checked = document.getElementById('syn_flood').checked
+
+            if (arp_spoof_checked | syn_flood_checked) {
+                eel.get_vals(arp_spoof_checked, syn_flood_checked)
+                document.getElementById('first').style.display = "None"
+                document.getElementById('second').style.display = "initial"
+            }
+            else {
+                document.getElementById('button').innerHTML = 'none is checked'
+            }
+
+
+        }
+        function Stop() {
+            document.getElementById('first').style.display = "initial"
+            document.getElementById('second').style.display = "none"
+            eel.stop_sniff()
+        }
+    </script>
+    <title>NIDS</title>
+</head>
+
+<body>
+    <div id="first">
+        <div class="container">
+            <h1>NIDS </h1>
+
+            <div class="group">
+                <input type="checkbox" id="arp_spoof" name="arp_spoof" value="arp_spoof">
+                <label for="arp_spoof"> Detect ARP Spoofing</label><br>
+            </div>
+
+            <div class="group">
+                <input type="checkbox" id="syn_flood" name="syn_flood" value="syn_flood">
+                <label for="syn_flood"> Detect Syn Flood</label><br>
+
+            </div>
+            <div class="group">
+                <button class="button" id="button" onclick="start()">Start</button>
+            </div>
+
+        </div>
+    </div>
+    <div id="second" style="display: none;">
+        <div class="container">
+            <div class="group">
+                <h2>Detecting . . . </h2>
+            </div>
+            <div class="group">
+                <button class="button" id="button" onclick="Stop()">Stop</button>
+            </div>
+        </div>
+    </div>
+
+</body>
+
+</html>
