@@ -59,13 +59,13 @@
                 input_field.style.maxHeight = "0";
             }
         }
-        eel.expose('action_upon_detecting_arp_spoof');
 
+        eel.expose(action_upon_detecting_arp_spoof);
         function action_upon_detecting_arp_spoof() {
             document.getElementById('message').innerHTML = "Arp Spoofing Attack Detected !!!"
         }
-        eel.expose('action_upon_detecting_syn_flood');
 
+        eel.expose(action_upon_detecting_syn_flood);
         function action_upon_detecting_syn_flood() {
             document.getElementById('message').innerHTML = "Syn Flood Attack Detected !!!"
         }

@@ -1,9 +1,10 @@
 from __future__ import print_function
 from collections import defaultdict
-from scapy.all import sniff, Ether
+from scapy.all import *
+from pynotifier import Notification
 
 class nids:
-
+    
     def __init__(self, action_upon_detecting_arp_spoof, action_upon_detecting_syn_flood):
         self.apr_responces = defaultdict(lambda: 0)
         self.tcp_open_ports = 0
@@ -15,6 +16,11 @@ class nids:
         self.action_upon_detecting_syn_flood = action_upon_detecting_syn_flood
         self.action_upon_detecting_arp_spoof = action_upon_detecting_arp_spoof
         
+    def reset_open_ports(self):
+        self.done = False
+        self.tcp_open_ports = 0
+        self.detect_syn_flood = True
+
     def start(self):
         sniff(filter='tcp or arp', prn=self.examine, store = False, stop_filter=lambda x: self.stop(x))
 
@@ -29,19 +35,19 @@ class nids:
         self.tcp_open_port_threshold = threshold
 
     def check_syn_flood(self, packet) :
-        print(packet.summary())
+        print('tcp open ports:',self.tcp_open_ports)
         if packet['TCP'].flags.S:
             self.tcp_open_ports += 1
         elif packet['TCP'].flags.A and not packet['TCP'].flags.SA:
-            self.tcp_open_ports -= 1
+            self.tcp_open_ports = max(0, self.tcp_open_ports-1)
         if self.tcp_open_ports > self.tcp_open_port_threshold :
             self.action_upon_detecting_syn_flood()
         
     def varify_mac(self, target_ip):
-        request_arp = scapy.ARP(pdst = target_ip)
-        br = scapy.Ether(dst="ff:ff:ff:ff:ff:ff")
+        request_arp = ARP(pdst = target_ip)
+        br = Ether(dst="ff:ff:ff:ff:ff:ff")
         arp_req_br = br / request_arp
-        list_1 = scapy.srp(arp_req_br, timeout=5,verbose=False)[0]
+        list_1 = srp(arp_req_br, timeout=5,verbose=False)[0]
         return list_1[0][1].hwsrc
 
     def check_arp_spoofing(self, packet):
@@ -50,7 +56,7 @@ class nids:
         is_at = 2;
         if packet['ARP'].op == is_at :
             received_mac = packet['ARP'].hwsrc
-            checked_mac = varify_mac(packet['ARP'].psrc)
+            checked_mac = self.varify_mac(packet['ARP'].psrc)
             if received_mac != checked_mac :
                 self.action_upon_detecting_arp_spoof()
 
@@ -63,6 +69,13 @@ class nids:
 
     
 if __name__ == '__main__':
-    p = nids()
-    p.start()
+    Notification(
+    icon_path="/home/atharva/Desktop/semII/MiniProject/NIDS/alert.png",
+    app_name = 'NIDS',
+	title='Syn Flood attack detected',
+	description='someone is attacking your server with syn flood attack!!',
+	duration=5,                              
+	urgency='normal'
+    
+    ).send()
 

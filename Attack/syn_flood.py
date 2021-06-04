@@ -1,7 +1,7 @@
 from scapy.all import *
 
-target_ip = input('target_ip: ')
-target_port = 80
+target_ip =  "192.168.1.5"  #target ip
+target_port = 9000
 
 ip = IP(src=RandIP("192.168.1.1/24"), dst=target_ip)
 
